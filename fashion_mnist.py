@@ -10,8 +10,6 @@ import torch.nn.functional as F
 #########################
 train_images_file = "C:/Users/nghor/OneDrive/Documents/fashion_mnist/train-images-idx3-ubyte.gz"
 train_labels_file = "C:/Users/nghor/OneDrive/Documents/fashion_mnist/train-labels-idx1-ubyte.gz"
-test_images_file = "C:/Users/nghor/OneDrive/Documents/fashion_mnist/t10k-images-idx3-ubyte.gz"
-test_labels_file = "C:/Users/nghor/OneDrive/Documents/fashion_mnist/t10k-labels-idx1-ubyte.gz"
 
 #################################
 ####    Data reader class    ####
@@ -61,12 +59,8 @@ class FashionMNISTDataset(Dataset):
 #################################################
 ####    Initialize dataset and dataloader    ####
 #################################################
-
 train_dataset = FashionMNISTDataset(train_images_file, train_labels_file)
-test_dataset = FashionMNISTDataset(test_images_file, test_labels_file)
-
 train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
-test_loader = DataLoader(test_dataset, batch_size=64, shuffle=False)
 
 ##########################################
 ####    Create Neural Network Model   ####
@@ -99,7 +93,7 @@ model = FashionMNISTModel()
 # Training setup
 epochs = 5
 learning_rate = 0.001
-optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
+optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)        # substantial accuracy gains using Adam compared to SGD (and others)
 loss_fn = nn.CrossEntropyLoss()
 
 # Training loop
@@ -120,7 +114,7 @@ train_loop(model, train_loader, optimizer, loss_fn, epochs)
 ####    Saving the model    ####
 ################################
 PATH = "fashion_mnist_model.pt"
-
+""" UN-COMMENT TO SAVE MODEL TO FILE
 def save_model(model, optimizer, epoch, path=PATH):
     torch.save({
         'epoch': epoch,
@@ -129,41 +123,4 @@ def save_model(model, optimizer, epoch, path=PATH):
     }, path)
 
 save_model(model, optimizer, epochs)
-
-#################################
-####    Loading the model    ####
-#################################
-def load_model(path=PATH):
-    model = FashionMNISTModel()
-    optimizer = torch.optim.Adam(model.parameters())
-
-    # load checkpoint
-    checkpoint = torch.load(path)
-    model.load_state_dict(checkpoint['model_state_dict'])
-    optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
-    epoch = checkpoint['epoch']
-
-    # set model to eval mode
-    model.eval()
-    print(f"Model loaded, trained for {epoch} epochs.")
-
-    return model, optimizer, epoch
-
-model, optimizer, trained_epoch = load_model()
-
-###################################
-####    Evaluating the model   ####
-###################################
-def evaluate(model, loader):
-    correct_predictions = 0
-    total_predictions = 0
-    with torch.no_grad():
-        for images, labels in loader:
-            outputs = model(images)
-            _, predicted = torch.max(outputs.data, 1)
-            total += labels.size(0)
-            correct_predictions += (predicted == labels).sum().item() 
-    accuracy = correct_predictions / total_predictions
-    print(f"Accuracy of the model on test images: {accuracy * 100:.2f}%")
-
-evaluate(model, test_loader)
+"""
