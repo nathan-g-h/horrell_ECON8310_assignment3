@@ -72,20 +72,23 @@ test_loader = DataLoader(test_dataset, batch_size=64, shuffle=False)
 ####    Create Neural Network Model   ####
 ##########################################
 class FashionMNISTModel(nn.Module):
+    """
+    This CNN model has two convolutional layers, then a max pooling later, then two fully connected layers. 
+    """
     def __init__(self):
         super(FashionMNISTModel, self).__init__()
-        self.conv1 = nn.Conv2d(1, 32, 3, 1)
-        self.conv2 = nn.Conv2d(32, 64, 3, 1)
-        self.fc1 = nn.Linear(9216, 128)
-        self.fc2 = nn.Linear(128, 10)
+        self.conv1 = nn.Conv2d(1, 32, 3, 1)        # 1 input channel, 32 output channels, kernel size of 3, stride of 1
+        self.conv2 = nn.Conv2d(32, 64, 3, 1)       # 32 input channels, 64 output channels, kernal size of 3, stride of 1
+        self.fc1 = nn.Linear(9216, 128)            # input size of 9216 (after flattening), output size of 128 neurons, all fully connected
+        self.fc2 = nn.Linear(128, 10)              # input size of 128 from previous fc later, output size of 10 for final classification
 
     def forward(self, x):
-        x = F.relu(self.conv1(x))
-        x = F.relu(self.conv2(x))
-        x = F.max_pool2d(x, 2)
-        x = torch.flatten(x, 1)
-        x = F.relu(self.fc1(x))
-        x = self.fc2(x)
+        x = F.relu(self.conv1(x))                  # convolution layer 1
+        x = F.relu(self.conv2(x))                  # convolution layer 2
+        x = F.max_pool2d(x, 2)                     # 2x2 max pooling layer
+        x = torch.flatten(x, 1)                    # flattening layer
+        x = F.relu(self.fc1(x))                    # first fully connected layer
+        x = self.fc2(x)                            # second fully connect layer
         return x
 
 model = FashionMNISTModel()
@@ -152,15 +155,15 @@ model, optimizer, trained_epoch = load_model()
 ####    Evaluating the model   ####
 ###################################
 def evaluate(model, loader):
-    correct = 0
-    total = 0
+    correct_predictions = 0
+    total_predictions = 0
     with torch.no_grad():
         for images, labels in loader:
             outputs = model(images)
             _, predicted = torch.max(outputs.data, 1)
             total += labels.size(0)
-            correct += (predicted == labels).sum().item()
-    accuracy = correct / total
+            correct_predictions += (predicted == labels).sum().item() 
+    accuracy = correct_predictions / total_predictions
     print(f"Accuracy of the model on test images: {accuracy * 100:.2f}%")
 
 evaluate(model, test_loader)
